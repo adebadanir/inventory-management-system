@@ -1,12 +1,17 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
   children: React.ReactNode;
 }
 
 export default function AuthLayout({ children }: Props) {
-  // const router = useRouter();
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <>Loading...</>;
+  }
+
   return <>{children}</>;
 }

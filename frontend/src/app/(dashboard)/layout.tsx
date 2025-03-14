@@ -13,13 +13,13 @@ interface Props {
 const { Content } = Layout;
 
 function DashboardLayout(props: Props) {
-  const { user } = useAuth();
+  const { isLoading } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const pathName = usePathname().replace("/", "");
 
-  if (!user) {
+  if (isLoading) {
     return <>Loading...</>;
   }
 
