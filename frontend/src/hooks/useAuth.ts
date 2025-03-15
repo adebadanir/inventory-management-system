@@ -40,8 +40,7 @@ export function useAuth() {
           },
         });
 
-        setUser(res.data);
-        console.log(pathName);
+        setUser(res.data[0]);
         // Jika sudah login dan ada di halaman login, arahkan ke dashboard
         if (publicRoutes.includes(pathName)) {
           router.push("/dashboard");

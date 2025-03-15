@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { createId } from "@paralleldrive/cuid2";
 
-import { db } from "../config/db";
-import { User } from "../models/user.model";
+import db from "../config/db";
+import { User } from "../types/user.type";
 import { hashPassword } from "../lib/hashPassword";
 import path from "path";
 import fs from "fs";

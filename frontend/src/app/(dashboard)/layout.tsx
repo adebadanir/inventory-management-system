@@ -13,7 +13,8 @@ interface Props {
 const { Content } = Layout;
 
 function DashboardLayout(props: Props) {
-  const { isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -26,6 +27,9 @@ function DashboardLayout(props: Props) {
   return (
     <Layout className="h-screen w-screen">
       <Navbar />
+      <p className="flex gap-4">
+        {[user?.id, user?.name, user?.email, user?.role, user?.avatar]}
+      </p>
       <Layout>
         <Sidebar />
         <Layout style={{ padding: "0 24px 24px" }}>
