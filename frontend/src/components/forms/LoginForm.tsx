@@ -1,36 +1,33 @@
-"use client";
-import { signIn } from "@/services/auth/auth.service";
-import "@ant-design/v5-patch-for-react-19";
 import type { FormProps } from "antd";
 import { Button, Form, Input } from "antd";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { login } from "../../services/auth.service";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
+import axios from "axios";
 
 type FieldType = {
   email: string;
   password: string;
 };
 
-function LoginForm() {
-  const router = useRouter();
-
+const LoginForm = () => {
+  const navigate = useNavigate();
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setMsg("");
     setError("");
-    try {
-      const response = await signIn(values.email, values.password);
-      if (response) {
-        setMsg(response.message);
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000 * 1);
-      }
-    } catch (error) {
-      setError(error as string);
+
+    const response = await login(
+      { email: values.email, password: values.password },
+      navigate
+    );
+    if (axios.isAxiosError(response)) {
+      setError(response.response?.data.message);
+    }
+    if (response.code === 200) {
+      setMsg(response.message);
     }
   };
 
@@ -39,13 +36,14 @@ function LoginForm() {
   ) => {
     console.log("Failed:", errorInfo);
   };
+
   return (
-    <div className="w-full max-w-md p-4 border rounded-md border-gray-200">
-      <h1 className="text-2xl text-center p-4 text-blue-600 font-semibold">
-        Inventory Management System
+    <div className="w-96 p-4 border rounded-md border-gray-200 ">
+      <h1 className="font-normal text-4xl p-4 flex w-full justify-center">
+        Login
       </h1>
       <Form
-        name="login"
+        name="loginForm"
         layout="vertical"
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
@@ -58,7 +56,6 @@ function LoginForm() {
         >
           <Input />
         </Form.Item>
-
         <Form.Item<FieldType>
           label="Password"
           name="password"
@@ -66,20 +63,19 @@ function LoginForm() {
         >
           <Input.Password />
         </Form.Item>
-        <Link href={"/register"} className="text-xs flex justify-end pb-4">
+        <Link to="/register" className="w-full flex justify-end">
           Create Account
         </Link>
-        {msg && (
-          <p className="text-green-500 w-full  rounded-sm bg-green-100 p-4 my-4">
-            {msg}
-          </p>
-        )}
-        {error && (
-          <p className="text-red-500 w-full  rounded-sm bg-red-100 p-4 my-4">
-            {error}
-          </p>
-        )}
-        <Form.Item label={null} className="flex justify-center">
+
+        <div className="my-2">
+          {error && <p className="text-red-500 bg-red-100 p-4">{error}</p>}
+          {msg && <p className="text-green-500 bg-green-100 p-4">{msg}</p>}
+        </div>
+
+        <Form.Item
+          label={null}
+          className="w-full flex justify-center items-center"
+        >
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
@@ -87,6 +83,6 @@ function LoginForm() {
       </Form>
     </div>
   );
-}
+};
 
 export default LoginForm;

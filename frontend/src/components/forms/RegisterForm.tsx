@@ -1,12 +1,9 @@
-"use client";
-import "@ant-design/v5-patch-for-react-19";
 import type { FormProps } from "antd";
 import { Button, Form, Input } from "antd";
-import { useRouter } from "next/navigation";
+import { signup } from "../../services/auth.service";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
-
-import { signUp } from "@/services/auth/auth.service";
-import Link from "next/link";
+import axios from "axios";
 
 type FieldType = {
   name: string;
@@ -15,29 +12,31 @@ type FieldType = {
   confPassword: string;
 };
 
-function RegisterForm() {
+const RegisterForm = () => {
+  const navigate = useNavigate();
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
-  const router = useRouter();
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setMsg("");
     setError("");
-    try {
-      const response = await signUp(
-        values.name,
-        values.email,
-        values.password,
-        values.confPassword
-      );
-      if (response) {
-        setMsg(response.message);
-        setTimeout(() => {
-          router.push("/login");
-        }, 1000 * 1);
+
+    const response = await signup(
+      {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        confPassword: values.confPassword,
+      },
+      navigate
+    );
+    if (axios.isAxiosError(response)) {
+      setError(response.response?.data.message);
+    } else {
+      const res = response as { code: number; message: string };
+      if (res.code === 200) {
+        setMsg(res.message);
       }
-    } catch (error) {
-      setError(error as string);
     }
   };
 
@@ -48,12 +47,12 @@ function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-4 border rounded-md border-gray-200">
-      <h1 className="text-2xl text-center p-4 text-blue-700 font-semibold">
-        Create Account
+    <div className="w-96 p-4 border rounded-md border-gray-200 ">
+      <h1 className="font-normal text-4xl p-4 flex w-full justify-center">
+        Sign Up
       </h1>
       <Form
-        name="register"
+        name="registerForm"
         layout="vertical"
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
@@ -62,65 +61,54 @@ function RegisterForm() {
         <Form.Item<FieldType>
           label="Name"
           name="name"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ required: true, message: "Please input your nae!" }]}
         >
           <Input />
         </Form.Item>
-
         <Form.Item<FieldType>
           label="Email"
           name="email"
-          rules={[
-            { required: true, message: "Please input your email!" },
-            { type: "email", message: "Please input valid Email!" },
-          ]}
+          rules={[{ required: true, message: "Please input your email!" }]}
         >
           <Input />
         </Form.Item>
-
         <Form.Item<FieldType>
           label="Password"
           name="password"
-          rules={[
-            { required: true, message: "Please input your password!" },
-            { min: 8, message: "Password must be at least 8 characters" },
-          ]}
+          rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password />
         </Form.Item>
-
         <Form.Item<FieldType>
           label="Confirm Password"
           name="confPassword"
           rules={[
-            { required: true, message: "Confirm Password cannot be empty!" },
+            { required: true, message: "Please input your password!" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("password") === value) {
                   return Promise.resolve();
                 }
-                return Promise.reject("Password does not match!");
+                return Promise.reject(new Error("Passwords do not match!"));
               },
             }),
           ]}
         >
           <Input.Password />
         </Form.Item>
-        <Link href={"/login"} className="text-xs flex justify-end pb-4">
+        <Link to="/" className="w-full flex justify-end">
           Already have an account?
         </Link>
-        {msg && (
-          <p className="text-green-500 w-full  rounded-sm bg-green-100 p-4 my-4">
-            {msg}
-          </p>
-        )}
-        {error && (
-          <p className="text-red-500 w-full  rounded-sm bg-red-100 p-4 my-4">
-            {error}
-          </p>
-        )}
 
-        <Form.Item className="flex justify-center">
+        <div className="my-2">
+          {error && <p className="text-red-500 bg-red-100 p-4">{error}</p>}
+          {msg && <p className="text-green-500 bg-green-100 p-4">{msg}</p>}
+        </div>
+
+        <Form.Item
+          label={null}
+          className="w-full flex justify-center items-center"
+        >
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
@@ -128,6 +116,6 @@ function RegisterForm() {
       </Form>
     </div>
   );
-}
+};
 
 export default RegisterForm;

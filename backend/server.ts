@@ -1,5 +1,5 @@
 import app from "./app";
-import syncDatabase from "./lib/syncDatabase";
+import syncDatabase from "./src/lib/syncDatabase";
 
 const PORT = process.env.APP_PORT || 5000;
 
